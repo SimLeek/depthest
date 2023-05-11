@@ -1,5 +1,5 @@
 from train_images import box_left_2, box_right_2
-from models.fixed_depth import FixedDepthEst
+from models.hconv9 import HConv9Est
 import torch
 from visualize.right_from_left import right_from_left
 from loss_functions.toy import toy_loss
@@ -45,9 +45,9 @@ def run():
     torch_left_edge = F.conv2d(torch_left_image, edge, padding=1)
     torch_right_edge = F.conv2d(torch_right_image, edge, padding=1)
 
-    model = FixedDepthEst(list(torch_left_image.shape[-2:]))
+    model = HConv9Est(list(torch_left_image.shape[-2:]))
 
-    optimizer = torch.optim.AdamW(model.parameters(), lr=1e-2, betas=(0.9, 0.999))
+    optimizer = torch.optim.AdamW(model.parameters(), lr=1e-4, betas=(0.9, 0.999))
     model.train()
     optimizer.zero_grad()
 
@@ -55,7 +55,7 @@ def run():
 
     d = display()
     while True:
-        disp = model.forward()
+        disp = model.forward(torch_left_image, torch_right_image)
         guess_right = right_from_left(torch_left_image, disp)
         #loss = pyramidal_loss(torch_left_image, torch_right_image, guess_right, disp)
         loss = pyramidal_loss_rand(torch_left_image, torch_right_image, guess_right, disp)
